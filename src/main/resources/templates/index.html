@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="stylesheet" th:href="@{/StyleSheet.css}"/>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Title</title>
+
+</head>
+<body>
+    <div class="container">
+
+        <div class="inputContainer">
+            <div class="containerChild" id="1">
+
+                <form id="numbers">
+                    <div class="child" id="minimum">
+
+                        <input type="number" class="inputChild" name="numbers"/>
+                    </div>
+
+                    <div class="child">
+                        <input type="number" class="inputChild" name="numbers"/>
+                    </div>
+
+                    <div class="child">
+                        <input type="number" class="inputChild" name="numbers"/>
+                    </div>
+
+                    <div class="child">
+                        <input type="number" class="inputChild" name="numbers"/>
+                    </div>
+
+                    <div class="child">
+                        <input type="number" class="inputChild" name="numbers"/>
+                    </div>
+
+                    <div class="child">
+                        <input type="number" class="inputChild" name="numbers"/>
+                    </div>
+
+                    <div class="child">
+                        <input type="number" class="inputChild" name="numbers"/>
+                    </div>
+
+                    <div class="child" id="maximum">
+                        <input type="number" class="inputChild" name="numbers"/>
+                    </div>
+                    <button type="submit">Sort</button>
+                </form>
+            </div>
+        </div>
+        <div class="sortContainer">
+
+        </div>
+
+    </div>
+
+    <script th:incline="javascript">
+        const postNumbers = document.getElementById("numbers");
+        if(postNumbers){
+            postNumbers.addEventListener('submit', function (event){
+                event.preventDefault();
+                let q;
+                const formData = new FormData(postNumbers);
+
+
+
+                          $.ajax({
+                            type: 'POST',
+                            url: '/index',
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                            success: function (){
+
+                                //remove the previous sort results
+                                const cleanse = document.querySelectorAll('.sortContainerChild');
+                                if(cleanse){
+                                    cleanse.forEach(div =>{
+                                        div.parentNode.removeChild(div);
+                                    });
+                                }
+
+
+                                let checkSorted=true;
+
+                                let high=8;
+                                $.ajax({
+                                    type: 'GET',
+                                    url: '/index/getList',
+                                    success: function (receivedList){
+
+
+
+                                        const numbersList = JSON.parse(receivedList);
+                                        const mainContainer = document.querySelector('.sortContainer');
+
+
+
+                                        const newContainer=document.createElement('div');
+                                        newContainer.classList.add('sortContainerChild');
+                                        newContainer.setAttribute('id', (2));
+
+                                        mainContainer.appendChild(newContainer);
+
+                                        numbersList.forEach(number =>{
+                                            const tempContainer = document.getElementById(2);
+                                            const child = document.createElement('div');
+                                            child.classList.add('child');
+                                            child.textContent = number.numbers;
+                                            tempContainer.appendChild(child);
+                                        });
+
+
+                                    }
+                                })
+                                repeat(1,1);
+
+                                function repeat(low, j){
+
+                                        $.ajax({
+                                            type: 'GET',
+                                            url: '/index/findMin?low=' + low + '&high=' + high,
+                                            success: function (gottenMin){
+
+                                                q=parseInt(gottenMin);
+
+                                                setTimeout(setAnimation, 1000);
+
+
+                                            }
+                                        })
+
+                                        function setAnimation(){
+
+
+                                            for(let i=low;i<=q;i++){
+                                                if(i===q){
+
+
+                                                    $("#"+(j+1)+" div:nth-child("+i+")")
+                                                        .css({
+
+                                                            animation: "minimum 0.3s ease normal forwards",
+                                                            "animation-delay" : 0.5*(i-1)+"s"
+                                                        });
+
+                                                    setTimeout(addSecondAnimation, 0.5*i*1000);
+
+                                                    function addSecondAnimation(){
+                                                        $("#"+(j+1)+" div:nth-child("+i+")")
+                                                            .css({
+                                                               animation:"minimum 0.3s ease normal forwards, textAnimation 1s ease normal forwards"
+                                                            });
+
+                                                        $("#"+(j+1)+" div:nth-child("+low+")")
+                                                            .css({
+                                                               animation: "textAnimation 1s ease normal forwards"
+                                                            });
+                                                    }
+
+                                                    setTimeout(function() {
+                                                        exchangeMin(i);
+                                                    }, 0.5*(i+3)*1000);
+
+                                                    setTimeout(createNext, 0.5*(i+4)*1000);
+
+
+                                                }
+                                                else {
+
+                                                    $("#"+(j+1)+" div:nth-child("+i+")").css({
+
+                                                        animation: "moveColor 0.3s ease normal",
+                                                        "animation-delay" : 0.5*(i-1)+"s"
+                                                    })
+                                                }
+                                            }
+
+                                        }
+
+                                        function exchangeMin(indexMin){
+
+                                            const min = $("#"+(j+1)+" div:nth-child("+indexMin+")").text();
+
+                                            $("#"+(j+1)+" div:nth-child("+indexMin+")").text($("#"+(j+1)+" div:nth-child("+low+")").text());
+                                            $("#"+(j+1)+" div:nth-child("+low+")").text(min);
+
+
+                                        }
+
+                                        function createNext(){
+                                            const mainContainer = document.querySelector('.sortContainer');
+                                            const newContainer=document.createElement('div');
+                                            newContainer.classList.add('sortContainerChild');
+                                            newContainer.setAttribute('id', (j+2));
+
+                                            mainContainer.appendChild(newContainer);
+
+
+                                            let i=1;
+
+                                            while(i<9){
+                                                const child = document.createElement('div');
+                                                const tempContainer = document.getElementById(j+2);
+                                                child.classList.add('child');
+                                                child.textContent = $("#"+(j+1)+" div:nth-child("+i+")").text();
+                                                tempContainer.appendChild(child);
+                                                i++;
+                                            }
+                                        }
+
+                                        checkSorted=false;
+
+
+
+
+
+                                    if(low<high-1) {
+                                        setTimeout(function () {
+                                            repeat((low+1), (j+1))
+                                        }, 5000);
+                                    }
+                                }
+                            }
+                        })
+
+
+
+
+            })
+        }
+
+    </script>
+</body>
+</html>
